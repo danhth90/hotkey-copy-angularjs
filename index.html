@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+          content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+            integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="./mousetrap.js"></script>
+    <script src="./hotkey.js"></script>
+    <title>Demo Copy Grid</title>
+    <style>
+        .selected {
+            background-color: azure;
+        }
+    </style>
+</head>
+
+<body ng-app="myapp">
+    <div ng-controller="HelloController">
+<div><table id="example"
+    class="display"
+    style="width:100%">
+ <thead>
+     <tr>
+         <th>Name</th>
+         <th>Position</th>
+         <th>Office</th>
+         <th>Age</th>
+         <th>Start date</th>
+         <th>Salary</th>
+     </tr>
+ </thead>
+ <tbody>
+     <tr ng-click="selectRow($event)">
+         <td>Tiger Nixon</td>
+         <td>System Architect</td>
+         <td>Edinburgh</td>
+         <td>61</td>
+         <td>2011/04/25</td>
+         <td>$320,800</td>
+     </tr>
+     <tr ng-click="selectRow($event)">
+         <td>Garrett Winters</td>
+         <td>Accountant</td>
+         <td>Tokyo</td>
+         <td>63</td>
+         <td>2011/07/25</td>
+         <td>$170,750</td>
+     </tr>
+     <tr ng-click="selectRow($event)">
+         <td>Ashton Cox</td>
+         <td>Junior Technical Author</td>
+         <td>San Francisco</td>
+         <td>66</td>
+         <td>2009/01/12</td>
+         <td>$86,000</td>
+     </tr>
+     <tr ng-click="selectRow($event)">
+         <td>Cedric Kelly</td>
+         <td>Senior Javascript Developer</td>
+         <td>Edinburgh</td>
+         <td>22</td>
+         <td>2012/03/29</td>
+         <td>$433,060</td>
+     </tr>
+ </tbody>
+ <tfoot>
+     <tr>
+         <th>Name</th>
+         <th>Position</th>
+         <th>Office</th>
+         <th>Age</th>
+         <th>Start date</th>
+         <th>Salary</th>
+     </tr>
+ </tfoot>
+</table></div>
+        <div>
+            data copied: {{copyData}}
+        </div>
+    </div>
+    <script>
+        angular.module("myapp", ['cfp.hotkeys'])
+
+            .controller("HelloController", function ($scope, hotkeys) {
+                $scope.helloTo = {};
+                $scope.copyData = {};
+                $scope.helloTo.title = "Demo Copy";
+
+                $scope.selectRow = function (e) {
+                    $(e.currentTarget).addClass('selected').siblings().removeClass('selected')
+                }
+                if (navigator.userAgentData.platform.indexOf('mac') >= 0) {
+                    hotkeys.add({
+                        combo: 'command+c',
+                        callback: function () {
+                            $scope.copyClipboard()
+                        }
+                    });
+                }
+                else {
+                    hotkeys.add({
+                        combo: 'ctrl+c',
+                        callback: function () {
+                            $scope.copyClipboard()
+                        }
+                    });
+                }
+
+                $scope.copyClipboard = function (e) {
+                    var arrayResult = [];
+
+                    var tdList = Array.prototype.slice.call(document.getElementsByClassName("selected")[0].getElementsByTagName('td'));
+                    tdList.forEach(function logArrayElements(element, index, array) {
+                        if (element.innerText && element.innerText != "undefined") {
+                            arrayResult.unshift(element.innerText);
+                        }
+                    });
+                    arrayResult = arrayResult.reverse();
+                    try {
+                        navigator.clipboard.writeText(arrayResult.join(";")).then(rec => {
+                            $scope.$apply(()=>{
+                                $scope.copyData = arrayResult.join(";")
+                            })
+                            
+                        });
+                    } catch (err) {
+                        console.error('Failed to copy: ', err);
+                    }
+
+
+                }
+            });
+    </script>
+</body>
+
+</html>
